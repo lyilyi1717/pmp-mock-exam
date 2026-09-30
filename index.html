@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PMP Mock Exam</title>
+<style>
+:root{
+  --bg:#f5f6f8; --panel:#ffffff; --panel2:#eef0f4; --ink:#1b1f27; --muted:#5d6675; --line:#d9dde4;
+  --accent:#2f5bd3; --accent-ink:#fff; --ok:#1d8a4e; --ok-bg:#e3f4ea; --bad:#c0392b; --bad-bg:#fbe7e4;
+  --warn:#b7791f; --warn-bg:#fdf1dc; --flag:#d97706; --shadow:0 1px 3px rgba(0,0,0,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12151b; --panel:#1b2029; --panel2:#232a35; --ink:#e7eaf0; --muted:#98a2b3; --line:#2f3845;
+    --accent:#6d8ff0; --accent-ink:#0d1117; --ok:#4cc38a; --ok-bg:#16342a; --bad:#f07167; --bad-bg:#3a1f1f;
+    --warn:#e0b04f; --warn-bg:#3a2f18; --flag:#f59e0b; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12151b; --panel:#1b2029; --panel2:#232a35; --ink:#e7eaf0; --muted:#98a2b3; --line:#2f3845;
+  --accent:#6d8ff0; --accent-ink:#0d1117; --ok:#4cc38a; --ok-bg:#16342a; --bad:#f07167; --bad-bg:#3a1f1f;
+  --warn:#e0b04f; --warn-bg:#3a2f18; --flag:#f59e0b; --shadow:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+header.top h1{font-size:20px;margin:0;letter-spacing:.2px}
+header.top h1 small{color:var(--muted);font-weight:500;font-size:13px;margin-left:8px}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:8px 14px}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.ghost{background:transparent}
+button:disabled{opacity:.45;cursor:not-allowed}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:var(--shadow)}
+.grid{display:grid;gap:14px}
+.modes{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.mode h3{margin:0 0 6px;font-size:16px}
+.mode p{margin:0 0 12px;color:var(--muted);font-size:14px}
+.mode .meta{font-size:12px;color:var(--muted);margin-bottom:12px}
+label.row{min-width:0;display:flex;align-items:center;gap:8px;margin:6px 0;font-size:14px}
+select,input[type=number]{max-width:100%;min-width:0;font:inherit;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+label.row select{flex:1 1 0;width:0}
+.muted{color:var(--muted)}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);margin-right:4px}
+.hidden{display:none!important}
+.stats-line{display:flex;flex-wrap:wrap;gap:18px;font-size:13px;color:var(--muted);margin-top:4px}
+
+/* exam */
+.exam{display:grid;grid-template-columns:1fr 250px;gap:14px}
+@media (max-width:820px){.exam{grid-template-columns:1fr}}
+.qbar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.timer{font-variant-numeric:tabular-nums;font-weight:700;font-size:18px}
+.timer.low{color:var(--bad)}
+.qtext{font-size:16.5px;margin:6px 0 16px;white-space:pre-wrap}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer;background:var(--panel)}
+.opt:hover{border-color:var(--accent)}
+.opt .key{flex:0 0 26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;background:var(--panel2);border:1px solid var(--line)}
+.opt.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.opt.sel .key{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}
+.opt.right .key{background:var(--ok);color:#fff;border-color:var(--ok)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt.wrong .key{background:var(--bad);color:#fff;border-color:var(--bad)}
+.opt.locked{cursor:default}
+.multi-hint{font-size:13px;color:var(--warn);font-weight:600;margin:-8px 0 10px}
+.feedback{margin-top:14px;padding:14px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);font-size:14px}
+.feedback h4{margin:0 0 6px;font-size:14px}
+.feedback .trap{margin-top:10px;padding:10px;border-radius:8px;background:var(--warn-bg);border-left:3px solid var(--warn)}
+.navbtns{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap}
+.side h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.navgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(34px,1fr));gap:4px;max-height:52vh;overflow:auto;padding:2px}
+.navgrid button{padding:5px 0;font-size:12px;border-radius:6px;position:relative}
+.navgrid button.ans{background:var(--panel2);font-weight:600}
+.navgrid button.cur{outline:2px solid var(--accent)}
+.navgrid button.flg::after{content:"";position:absolute;top:2px;right:2px;width:7px;height:7px;border-radius:50%;background:var(--flag)}
+.navgrid button.ok{background:var(--ok-bg);border-color:var(--ok)}
+.navgrid button.no{background:var(--bad-bg);border-color:var(--bad)}
+.legend{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.8}
+.flagbtn.on{color:var(--flag);border-color:var(--flag);font-weight:600}
+.progress{height:6px;background:var(--panel2);border-radius:99px;overflow:hidden;margin-top:10px}
+.progress>div{height:100%;background:var(--accent)}
+
+/* results */
+.big{font-size:44px;font-weight:800;line-height:1}
+.verdict{font-size:18px;font-weight:700;margin-top:6px}
+.bars .bar{margin:10px 0}
+.bars .lbl{display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px}
+.bars .track{height:10px;background:var(--panel2);border-radius:99px;overflow:hidden}
+.bars .fill{height:100%;border-radius:99px}
+.r-AT{color:var(--ok)} .r-T{color:var(--accent)} .r-BT{color:var(--warn)} .r-NI{color:var(--bad)}
+.bg-AT{background:var(--ok)} .bg-T{background:var(--accent)} .bg-BT{background:var(--warn)} .bg-NI{background:var(--bad)}
+.review-item{border-top:1px solid var(--line);padding:14px 0}
+.review-item:first-child{border-top:0}
+.review-item .opt{cursor:default}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tabs button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;padding:16px;z-index:10}
+.modal{max-width:440px;width:100%}
+.modal .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.kbd{font-family:ui-monospace,Consolas,monospace;font-size:12px;padding:1px 5px;border:1px solid var(--line);border-radius:4px;background:var(--panel2)}
+.breakscreen{text-align:center;padding:40px 18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>PMP Mock Exam <small id="bankInfo"></small></h1>
+    <div style="display:flex;gap:8px">
+      <button class="ghost" id="homeBtn" title="Home">Home</button>
+      <button class="ghost" id="themeBtn" title="Toggle theme">Theme</button>
+    </div>
+  </header>
+
+  <!-- HOME -->
+  <section id="home">
+    <div id="resumeBox" class="card hidden" style="margin-bottom:14px;border-color:var(--accent)">
+      <strong>Unfinished session found.</strong> <span id="resumeInfo" class="muted"></span>
+      <div style="margin-top:10px;display:flex;gap:8px"><button class="primary" id="resumeBtn">Resume</button><button id="discardBtn">Discard</button></div>
+    </div>
+
+    <div class="grid modes">
+      <div class="card mode">
+        <h3>Full Mock Exam</h3>
+        <p>Exam conditions. Weighted like the real ECO: People 42%, Process 50%, Business Environment 8%. No feedback until the end.</p>
+        <div class="meta">180 questions · 230 minutes · optional 10-min breaks after Q60 and Q120</div>
+        <button class="primary" data-start="full">Start full exam</button>
+      </div>
+      <div class="card mode">
+        <h3>Timed Mini Mock</h3>
+        <p>Same conditions, shorter. Good for a daily run. Time per question matches the real exam (~77 s).</p>
+        <label class="row">Questions <select id="miniCount"><option>30</option><option selected>60</option><option>90</option></select></label>
+        <button class="primary" data-start="mini">Start mini mock</button>
+      </div>
+      <div class="card mode">
+        <h3>Training Mode</h3>
+        <p>Untimed. Instant feedback after each answer, with the trap explained and the reasoning.</p>
+        <label class="row">Questions <input type="number" id="trCount" min="5" max="250" value="25" style="width:80px"></label>
+        <label class="row">Domain <select id="trDomain"><option value="">All</option><option>People</option><option>Process</option><option>Business Environment</option></select></label>
+        <label class="row">Approach <select id="trApproach"><option value="">All</option><option>predictive</option><option>agile</option><option>hybrid</option></select></label>
+        <label class="row">Topic <select id="trTopic"><option value="">All</option></select></label>
+        <button class="primary" data-start="train">Start training</button>
+      </div>
+      <div class="card mode">
+        <h3>Weak Spots</h3>
+        <p>Retrain the questions you got wrong most recently, plus ones you haven't seen yet. Instant feedback.</p>
+        <div class="meta" id="weakInfo"></div>
+        <button class="primary" data-start="weak" id="weakBtn">Drill weak spots</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <h3 style="margin:0;font-size:16px">History</h3>
+        <button class="ghost" id="clearHist" style="font-size:13px">Reset history & stats</button>
+      </div>
+      <div id="history" style="margin-top:8px"></div>
+    </div>
+
+    <p class="muted" style="font-size:13px;margin-top:14px">
+      Keys: <span class="kbd">1</span>-<span class="kbd">5</span> or <span class="kbd">A</span>-<span class="kbd">E</span> select ·
+      <span class="kbd">→</span>/<span class="kbd">N</span> next · <span class="kbd">←</span>/<span class="kbd">P</span> previous ·
+      <span class="kbd">F</span> flag · <span class="kbd">Enter</span> check answer (training).
+      Pass estimate is unofficial: PMI does not publish a cut score. Ratings use the PMI report bands (Above Target / Target / Below Target / Needs Improvement) with estimated thresholds.
+    </p>
+  </section>
+
+  <!-- EXAM -->
+  <section id="exam" class="hidden">
+    <div class="exam">
+      <div class="card">
+        <div class="qbar">
+          <div><strong id="qNum"></strong> <span id="qTags"></span></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="flagbtn" id="flagBtn">Flag</button>
+            <span class="timer" id="timer"></span>
+          </div>
+        </div>
+        <div class="qtext" id="qText"></div>
+        <div class="multi-hint hidden" id="multiHint"></div>
+        <div id="opts"></div>
+        <div id="feedback" class="feedback hidden"></div>
+        <div class="navbtns">
+          <button id="prevBtn">Previous</button>
+          <div style="display:flex;gap:8px">
+            <button id="checkBtn" class="primary hidden">Check answer</button>
+            <button id="nextBtn" class="primary">Next</button>
+          </div>
+        </div>
+        <div class="progress"><div id="prog"></div></div>
+      </div>
+      <aside class="card side">
+        <h4>Navigator</h4>
+        <div class="navgrid" id="navgrid"></div>
+        <div class="legend" id="navLegend"></div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+          <button id="reviewFlagged">Go to next flagged</button>
+          <button id="pauseBtn">Save & exit</button>
+          <button class="primary" id="submitBtn">Finish & score</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- BREAK -->
+  <section id="breakScr" class="hidden">
+    <div class="card breakscreen">
+      <h2 style="margin:0 0 8px">Optional break</h2>
+      <p class="muted">You've completed a section. On the real exam you get a 10-minute break and cannot return to earlier questions. The exam clock is paused.</p>
+      <div class="big" id="breakTimer" style="margin:18px 0">10:00</div>
+      <button class="primary" id="endBreak">Continue exam</button>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results" class="hidden">
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+      <div class="card">
+        <div class="muted" id="resMode"></div>
+        <div class="big" id="resPct"></div>
+        <div class="verdict" id="resVerdict"></div>
+        <div class="stats-line" id="resStats"></div>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 4px;font-size:15px">By domain</h3>
+        <div class="bars" id="resDomains"></div>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 4px;font-size:15px">By approach</h3>
+        <div class="bars" id="resApproach"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3 style="margin:0 0 8px;font-size:15px">Weakest topics</h3>
+      <div id="resTopics"></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <h3 style="margin:0;font-size:15px">Answer review</h3>
+        <div class="tabs" id="revTabs">
+          <button data-f="wrong" class="on">Wrong</button><button data-f="flagged">Flagged</button><button data-f="all">All</button>
+        </div>
+      </div>
+      <div id="reviewList"></div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="primary" id="retryWrong">Retrain the ones I missed</button>
+        <button id="backHome">Back to home</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="modal" class="modal-bg hidden"><div class="card modal"><div id="modalBody"></div><div class="actions" id="modalActions"></div></div></div>
+
+<script src="questions/people.js"></script>
+<script src="questions/process-predictive.js"></script>
+<script src="questions/process-agile.js"></script>
+<script src="questions/business.js"></script>
+<script>
+(function(){
+"use strict";
+const BANK = (window.PMP_Q || []).filter(q => q && q.id && Array.isArray(q.options));
+const BY_ID = Object.fromEntries(BANK.map(q => [q.id, q]));
+const LS_SESSION = "pmp.session.v1", LS_HIST = "pmp.history.v1", LS_STATS = "pmp.qstats.v1", LS_THEME = "pmp.theme";
+const DOMAINS = ["People", "Process", "Business Environment"];
+const WEIGHTS = {"People": .42, "Process": .50, "Business Environment": .08};
+const SEC_PER_Q = 230 * 60 / 180;
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const L = "ABCDE";
+
+function load(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } }
+function save(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+function drop(k){ try { localStorage.removeItem(k); } catch(e){} }
+
+// theme
+(function(){ const t = load(LS_THEME, null); if (t) document.documentElement.dataset.theme = t; })();
+$("themeBtn").onclick = () => {
+  const cur = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const nx = cur === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = nx; save(LS_THEME, nx);
+};
+
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const isMulti = q => Array.isArray(q.answer);
+const ansSet = q => isMulti(q) ? q.answer : [q.answer];
+function fmt(sec){ sec = Math.max(0, Math.round(sec)); const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+  return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(s).padStart(2, "0"); }
+
+// ---------- selection ----------
+function weightedPick(n, pool){
+  const out = [];
+  DOMAINS.forEach((d, i) => {
+    const want = i === DOMAINS.length - 1 ? n - out.length : Math.round(n * WEIGHTS[d]);
+    out.push(...shuffle(pool.filter(q => q.domain === d)).slice(0, want));
+  });
+  if (out.length < n){ const have = new Set(out.map(q => q.id)); out.push(...shuffle(pool.filter(q => !have.has(q.id))).slice(0, n - out.length)); }
+  return shuffle(out);
+}
+function weakPick(n){
+  const st = load(LS_STATS, {});
+  const wrong = BANK.filter(q => st[q.id] && st[q.id].last === 0).sort((a, b) => (st[b.id].w / st[b.id].n) - (st[a.id].w / st[a.id].n));
+  const unseen = shuffle(BANK.filter(q => !st[q.id]));
+  const shaky = BANK.filter(q => st[q.id] && st[q.id].last === 1 && st[q.id].w > 0);
+  return shuffle([...wrong, ...shaky, ...unseen].slice(0, n));
+}
+
+// ---------- session ----------
+let S = null, tick = null;
+
+function newSession(mode, ids, opts){
+  S = {
+    mode, ids, title: opts.title, timed: !!opts.limit, limit: opts.limit || 0, elapsed: 0,
+    instant: !!opts.instant, breaks: opts.breaks || [], breaksDone: [], idx: 0,
+    order: ids.map(id => shuffle(BY_ID[id].options.map((_, i) => i))),
+    resp: ids.map(() => []), checked: ids.map(() => false), flags: ids.map(() => false),
+    qtime: ids.map(() => 0), started: Date.now()
+  };
+  persist(); showExam();
+}
+function persist(){ if (S) save(LS_SESSION, S); }
+
+function show(id){ ["home", "exam", "results", "breakScr"].forEach(s => $(s).classList.toggle("hidden", s !== id)); window.scrollTo(0, 0); }
+
+function showExam(){
+  show("exam");
+  $("checkBtn").classList.toggle("hidden", !S.instant);
+  $("navLegend").innerHTML = S.instant
+    ? '<span class="tag" style="background:var(--ok-bg)">correct</span><span class="tag" style="background:var(--bad-bg)">wrong</span> dot = flagged'
+    : '<span class="tag">shaded = answered</span> dot = flagged';
+  startClock(); render();
+}
+
+function startClock(){
+  clearInterval(tick);
+  let last = Date.now();
+  tick = setInterval(() => {
+    const now = Date.now(), dt = (now - last) / 1000; last = now;
+    if (!S || $("exam").classList.contains("hidden")) return;
+    S.elapsed += dt; S.qtime[S.idx] += dt;
+    drawTimer();
+    if (S.timed && S.elapsed >= S.limit){ finish(true); return; }
+    if (Math.round(S.elapsed) % 5 === 0) persist();
+  }, 1000);
+  drawTimer();
+}
+function drawTimer(){
+  const t = $("timer");
+  if (S.timed){ const left = S.limit - S.elapsed; t.textContent = fmt(left) + " left"; t.classList.toggle("low", left < 600); }
+  else { t.textContent = fmt(S.elapsed); t.classList.remove("low"); }
+}
+
+function isCorrect(i){ const q = BY_ID[S.ids[i]], a = ansSet(q), r = S.resp[i]; return r.length === a.length && a.every(x => r.includes(x)); }
+
+function render(){
+  const i = S.idx, q = BY_ID[S.ids[i]], n = S.ids.length, multi = isMulti(q), need = ansSet(q).length;
+  const locked = S.instant && S.checked[i];
+  $("qNum").textContent = "Question " + (i + 1) + " of " + n;
+  $("qTags").innerHTML = S.instant ? '<span class="tag">' + esc(q.domain) + '</span><span class="tag">' + esc(q.approach) + '</span><span class="tag">' + esc(q.topic) + '</span>' : "";
+  $("qText").textContent = q.q;
+  $("multiHint").classList.toggle("hidden", !multi);
+  $("multiHint").textContent = multi ? "Select " + need + " answers." : "";
+  const box = $("opts"); box.innerHTML = "";
+  S.order[i].forEach((oi, pos) => {
+    const d = document.createElement("div");
+    const sel = S.resp[i].includes(oi);
+    d.className = "opt" + (sel ? " sel" : "") + (locked ? " locked" : "");
+    if (locked){ if (ansSet(q).includes(oi)) d.classList.add("right"); else if (sel) d.classList.add("wrong"); }
+    d.innerHTML = '<span class="key">' + L[pos] + '</span><span>' + esc(q.options[oi]) + '</span>';
+    d.onclick = () => choose(pos);
+    box.appendChild(d);
+  });
+  const fb = $("feedback");
+  if (locked){ fb.classList.remove("hidden"); fb.innerHTML = feedbackHTML(q, i); } else fb.classList.add("hidden");
+  $("flagBtn").classList.toggle("on", S.flags[i]);
+  $("flagBtn").textContent = S.flags[i] ? "Flagged" : "Flag";
+  $("prevBtn").disabled = i === 0 || i - 1 <= lastBreakBoundary();
+  $("checkBtn").disabled = locked || S.resp[i].length !== need;
+  $("nextBtn").textContent = i === n - 1 ? "Finish" : "Next";
+  $("prog").style.width = (100 * S.resp.filter(r => r.length).length / n) + "%";
+  drawNav();
+}
+function lastBreakBoundary(){ return S.breaksDone.length ? Math.max(...S.breaksDone) : -1; }
+
+function feedbackHTML(q, i){
+  const ok = isCorrect(i);
+  const correct = ansSet(q).map(a => L[S.order[i].indexOf(a)]).sort().join(", ");
+  return '<h4 class="' + (ok ? "r-AT" : "r-NI") + '">' + (ok ? "Correct" : "Incorrect — answer: " + correct) + '</h4>' +
+    '<div>' + esc(q.explanation) + '</div>' +
+    (q.trap ? '<div class="trap"><strong>The trap:</strong> ' + esc(relabel(q.trap, q, S.order[i])) + '</div>' : "");
+}
+// trap text refers to original option letters; remap to the shuffled letters shown
+function relabel(text, q, order){
+  return String(text).replace(/\b(?:option|options|choice)\s+([A-E])\b|\(([A-E])\)/gi, (m, a, b) => {
+    const orig = L.indexOf((a || b).toUpperCase()); if (orig < 0 || orig >= q.options.length) return m;
+    const shown = L[order.indexOf(orig)];
+    return a ? m.replace(new RegExp(a + "$"), shown) : "(" + shown + ")";
+  });
+}
+
+function choose(pos){
+  const i = S.idx, q = BY_ID[S.ids[i]];
+  if (S.instant && S.checked[i]) return;
+  const oi = S.order[i][pos]; if (oi == null) return;
+  if (isMulti(q)){
+    const r = S.resp[i], k = r.indexOf(oi);
+    if (k >= 0) r.splice(k, 1); else { r.push(oi); if (r.length > q.answer.length) r.shift(); }
+  } else S.resp[i] = [oi];
+  persist(); render();
+}
+function check(){
+  const i = S.idx, q = BY_ID[S.ids[i]];
+  if (!S.instant || S.checked[i] || S.resp[i].length !== ansSet(q).length) return;
+  S.checked[i] = true; recordStat(q.id, isCorrect(i)); persist(); render();
+}
+function go(to){
+  if (to < 0 || to >= S.ids.length) return;
+  if (to < S.idx && to <= lastBreakBoundary()) return;
+  // break points: moving past the boundary question
+  const bp = S.breaks.find(b => S.idx === b && to > b && !S.breaksDone.includes(b));
+  if (bp != null){ confirmBreak(bp, to); return; }
+  S.idx = to; persist(); render();
+}
+function confirmBreak(bp, to){
+  const unanswered = S.ids.slice(lastBreakBoundary() + 1, bp + 1).filter((_, k) => !S.resp[lastBreakBoundary() + 1 + k].length).length;
+  modal("<h3 style='margin-top:0'>End of section</h3><p>After this point you cannot return to questions 1-" + (bp + 1) + "." +
+    (unanswered ? " <strong>" + unanswered + " unanswered</strong> in this section." : "") + "</p>",
+    [["Stay", null], ["Skip break", () => { S.breaksDone.push(bp); S.idx = to; persist(); render(); }],
+     ["Take 10-min break", () => { S.breaksDone.push(bp); S.idx = to; persist(); takeBreak(); }, true]]);
+}
+function takeBreak(){
+  show("breakScr"); let left = 600; $("breakTimer").textContent = fmt(left);
+  clearInterval(tick);
+  tick = setInterval(() => { left--; $("breakTimer").textContent = fmt(left); if (left <= 0) endBreak(); }, 1000);
+}
+function endBreak(){ clearInterval(tick); showExam(); }
+$("endBreak").onclick = endBreak;
+
+function drawNav(){
+  const g = $("navgrid"); g.innerHTML = "";
+  const lb = lastBreakBoundary();
+  S.ids.forEach((id, k) => {
+    const b = document.createElement("button"); b.textContent = k + 1;
+    if (S.resp[k].length) b.classList.add("ans");
+    if (S.instant && S.checked[k]) b.classList.add(isCorrect(k) ? "ok" : "no");
+    if (S.flags[k]) b.classList.add("flg");
+    if (k === S.idx) b.classList.add("cur");
+    if (k <= lb) b.disabled = true;
+    b.onclick = () => { if (k > S.idx && S.breaks.some(bp => S.idx <= bp && k > bp && !S.breaksDone.includes(bp))) { S.idx = S.breaks.find(bp => S.idx <= bp && k > bp); render(); go(k); } else { S.idx = k; persist(); render(); } };
+    g.appendChild(b);
+  });
+  const cur = g.children[S.idx]; if (cur && cur.scrollIntoView) cur.scrollIntoView({block: "nearest"});
+}
+
+$("prevBtn").onclick = () => go(S.idx - 1);
+$("nextBtn").onclick = () => { if (S.idx === S.ids.length - 1) askFinish(); else go(S.idx + 1); };
+$("checkBtn").onclick = check;
+$("flagBtn").onclick = () => { S.flags[S.idx] = !S.flags[S.idx]; persist(); render(); };
+$("reviewFlagged").onclick = () => {
+  const n = S.ids.length;
+  for (let k = 1; k <= n; k++){ const j = (S.idx + k) % n; if (S.flags[j] && j > lastBreakBoundary()){ S.idx = j; render(); return; } }
+  modal("<p>No flagged questions available.</p>", [["OK", null, true]]);
+};
+$("pauseBtn").onclick = () => { persist(); clearInterval(tick); goHome(); };
+$("submitBtn").onclick = askFinish;
+
+function askFinish(){
+  const un = S.resp.filter(r => !r.length).length, fl = S.flags.filter(Boolean).length;
+  modal("<h3 style='margin-top:0'>Finish and score?</h3><p>" + (un ? "<strong>" + un + " unanswered</strong> (scored as wrong). " : "All questions answered. ") +
+    (fl ? fl + " flagged." : "") + "</p>", [["Keep going", null], ["Finish", () => finish(false), true]]);
+}
+
+function recordStat(id, ok){
+  const st = load(LS_STATS, {}); const s = st[id] || {n: 0, w: 0, last: 1};
+  s.n++; if (!ok) s.w++; s.last = ok ? 1 : 0; st[id] = s; save(LS_STATS, st);
+}
+
+function rating(p){ return p >= .75 ? ["AT", "Above Target"] : p >= .65 ? ["T", "Target"] : p >= .50 ? ["BT", "Below Target"] : ["NI", "Needs Improvement"]; }
+
+function finish(timeUp){
+  clearInterval(tick);
+  const n = S.ids.length;
+  if (!S.instant) S.ids.forEach((id, k) => recordStat(id, isCorrect(k)));
+  else S.ids.forEach((id, k) => { if (!S.checked[k] && S.resp[k].length) recordStat(id, isCorrect(k)); });
+  const correct = S.ids.filter((_, k) => isCorrect(k)).length;
+  const groups = key => {
+    const m = {}; S.ids.forEach((id, k) => { const g = BY_ID[id][key]; m[g] = m[g] || {c: 0, n: 0}; m[g].n++; if (isCorrect(k)) m[g].c++; }); return m;
+  };
+  const res = {
+    at: Date.now(), mode: S.mode, title: S.title, n, correct, elapsed: S.elapsed, timeUp,
+    dom: groups("domain"), appr: groups("approach"), topic: groups("topic"),
+    ids: S.ids, resp: S.resp, order: S.order, flags: S.flags
+  };
+  const hist = load(LS_HIST, []);
+  hist.unshift({at: res.at, title: res.title, n, correct, elapsed: res.elapsed, dom: res.dom});
+  save(LS_HIST, hist.slice(0, 50));
+  drop(LS_SESSION);
+  S = null;
+  showResults(res);
+}
+
+let R = null;
+function bar(label, g){
+  const p = g.n ? g.c / g.n : 0, [cls, txt] = rating(p);
+  return '<div class="bar"><div class="lbl"><span>' + esc(label) + ' <span class="muted">(' + g.c + '/' + g.n + ')</span></span><span class="r-' + cls + '">' + Math.round(p * 100) + '% · ' + txt + '</span></div>' +
+    '<div class="track"><div class="fill bg-' + cls + '" style="width:' + (p * 100) + '%"></div></div></div>';
+}
+function showResults(res){
+  R = res; show("results");
+  const p = res.correct / res.n, [cls, txt] = rating(p);
+  $("resMode").textContent = res.title + (res.timeUp ? " · time expired" : "");
+  $("resPct").innerHTML = '<span class="r-' + cls + '">' + Math.round(p * 100) + '%</span>';
+  $("resVerdict").innerHTML = '<span class="r-' + cls + '">' + txt + '</span> — ' + (p >= .65 ? "likely pass range" : p >= .58 ? "borderline; keep drilling" : "not yet exam-ready");
+  $("resStats").innerHTML = '<span>' + res.correct + ' / ' + res.n + ' correct</span><span>time ' + fmt(res.elapsed) + '</span><span>' + Math.round(res.elapsed / res.n) + ' s / question (exam pace ' + Math.round(SEC_PER_Q) + ' s)</span>';
+  $("resDomains").innerHTML = DOMAINS.filter(d => res.dom[d]).map(d => bar(d, res.dom[d])).join("");
+  $("resApproach").innerHTML = ["predictive", "agile", "hybrid"].filter(a => res.appr[a]).map(a => bar(a, res.appr[a])).join("");
+  const tops = Object.entries(res.topic).filter(([, g]) => g.c < g.n).sort((a, b) => (a[1].c / a[1].n) - (b[1].c / b[1].n) || b[1].n - a[1].n).slice(0, 10);
+  $("resTopics").innerHTML = tops.length ? '<table><tr><th>Topic</th><th>Score</th><th>Missed</th></tr>' +
+    tops.map(([t, g]) => '<tr><td>' + esc(t) + '</td><td>' + Math.round(100 * g.c / g.n) + '%</td><td>' + (g.n - g.c) + ' of ' + g.n + '</td></tr>').join("") + '</table>' : '<p class="muted">Nothing missed. Try a harder mix.</p>';
+  $("retryWrong").disabled = res.correct === res.n;
+  setReviewFilter("wrong");
+}
+function correctFor(res, k){ const q = BY_ID[res.ids[k]], a = ansSet(q), r = res.resp[k]; return r.length === a.length && a.every(x => r.includes(x)); }
+function setReviewFilter(f){
+  [...$("revTabs").children].forEach(b => b.classList.toggle("on", b.dataset.f === f));
+  const list = $("reviewList"), res = R;
+  const ks = res.ids.map((_, k) => k).filter(k => f === "all" || (f === "wrong" && !correctFor(res, k)) || (f === "flagged" && res.flags[k]));
+  if (!ks.length){ list.innerHTML = '<p class="muted">Nothing here.</p>'; return; }
+  list.innerHTML = ks.map(k => {
+    const q = BY_ID[res.ids[k]], ok = correctFor(res, k), a = ansSet(q);
+    const opts = res.order[k].map((oi, pos) => {
+      const sel = res.resp[k].includes(oi), right = a.includes(oi);
+      return '<div class="opt locked ' + (right ? "right" : sel ? "wrong" : "") + '"><span class="key">' + L[pos] + '</span><span>' + esc(q.options[oi]) + (sel ? ' <em class="muted">(your answer)</em>' : "") + '</span></div>';
+    }).join("");
+    const trap = q.trap ? esc(relabel(q.trap, q, res.order[k])) : "";
+    return '<div class="review-item"><div><strong class="' + (ok ? "r-AT" : "r-NI") + '">Q' + (k + 1) + (ok ? " ✓" : res.resp[k].length ? " ✗" : " — unanswered") + '</strong> ' +
+      '<span class="tag">' + esc(q.domain) + '</span><span class="tag">' + esc(q.approach) + '</span><span class="tag">' + esc(q.topic) + '</span>' + (res.flags[k] ? '<span class="tag" style="color:var(--flag)">flagged</span>' : "") + '</div>' +
+      '<div class="qtext">' + esc(q.q) + '</div>' + opts +
+      '<div class="feedback"><div>' + esc(q.explanation) + '</div>' + (trap ? '<div class="trap"><strong>The trap:</strong> ' + trap + '</div>' : "") + '</div></div>';
+  }).join("");
+}
+$("revTabs").onclick = e => { if (e.target.dataset.f) setReviewFilter(e.target.dataset.f); };
+$("retryWrong").onclick = () => {
+  const ids = R.ids.filter((_, k) => !correctFor(R, k));
+  if (ids.length) newSession("train", shuffle(ids), {title: "Retrain missed (" + ids.length + ")", instant: true});
+};
+$("backHome").onclick = goHome;
+
+// ---------- home ----------
+function goHome(){
+  clearInterval(tick);
+  if (S) persist();
+  S = null; show("home"); renderHome();
+}
+$("homeBtn").onclick = () => {
+  if (S && !$("exam").classList.contains("hidden")) { modal("<p>Save this session and go home? You can resume later.</p>", [["Cancel", null], ["Save & exit", goHome, true]]); }
+  else goHome();
+};
+
+function renderHome(){
+  const counts = DOMAINS.map(d => d.split(" ")[0] + " " + BANK.filter(q => q.domain === d).length).join(" · ");
+  $("bankInfo").textContent = BANK.length + " questions (" + counts + ")";
+  const tSel = $("trTopic"), cur = tSel.value;
+  const topics = [...new Set(BANK.map(q => q.topic))].sort();
+  tSel.innerHTML = '<option value="">All</option>' + topics.map(t => '<option' + (t === cur ? " selected" : "") + '>' + esc(t) + '</option>').join("");
+  const sess = load(LS_SESSION, null);
+  $("resumeBox").classList.toggle("hidden", !sess);
+  if (sess) $("resumeInfo").textContent = sess.title + " — question " + (sess.idx + 1) + " of " + sess.ids.length + ", " + fmt(sess.elapsed) + " elapsed.";
+  const st = load(LS_STATS, {}), seen = Object.keys(st).length, wrong = Object.values(st).filter(s => s.last === 0).length;
+  $("weakInfo").textContent = seen + " of " + BANK.length + " seen · " + wrong + " currently wrong · " + (BANK.length - seen) + " unseen";
+  const hist = load(LS_HIST, []);
+  $("history").innerHTML = hist.length ? '<table><tr><th>Date</th><th>Session</th><th>Score</th><th>People</th><th>Process</th><th>Bus. Env.</th><th>Time</th></tr>' +
+    hist.slice(0, 15).map(h => {
+      const d = new Date(h.at), pc = g => g ? Math.round(100 * g.c / g.n) + "%" : "–";
+      const p = h.correct / h.n, [cls] = rating(p);
+      return '<tr><td>' + d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}) + '</td><td>' + esc(h.title) + '</td><td class="r-' + cls + '"><strong>' + Math.round(p * 100) + '%</strong> <span class="muted">(' + h.correct + '/' + h.n + ')</span></td><td>' + pc(h.dom["People"]) + '</td><td>' + pc(h.dom["Process"]) + '</td><td>' + pc(h.dom["Business Environment"]) + '</td><td>' + fmt(h.elapsed) + '</td></tr>';
+    }).join("") + '</table>' : '<p class="muted">No attempts yet.</p>';
+}
+$("clearHist").onclick = () => modal("<p>Delete all history and per-question stats?</p>", [["Cancel", null], ["Delete", () => { drop(LS_HIST); drop(LS_STATS); renderHome(); }, true]]);
+$("resumeBtn").onclick = () => { S = load(LS_SESSION, null); if (S) showExam(); };
+$("discardBtn").onclick = () => { drop(LS_SESSION); renderHome(); };
+
+document.querySelectorAll("[data-start]").forEach(b => b.onclick = () => {
+  if (!BANK.length){ modal("<p>No questions loaded. Check the <code>questions/</code> folder.</p>", [["OK", null, true]]); return; }
+  const m = b.dataset.start;
+  const begin = () => {
+    if (m === "full"){
+      const n = Math.min(180, BANK.length), ids = weightedPick(n, BANK).map(q => q.id);
+      const breaks = n >= 180 ? [59, 119] : [];
+      newSession("full", ids, {title: "Full mock exam (" + n + ")", limit: Math.round(n * SEC_PER_Q), breaks});
+    } else if (m === "mini"){
+      const n = Math.min(+$("miniCount").value, BANK.length);
+      newSession("mini", weightedPick(n, BANK).map(q => q.id), {title: "Mini mock (" + n + ")", limit: Math.round(n * SEC_PER_Q)});
+    } else if (m === "train"){
+      const d = $("trDomain").value, a = $("trApproach").value, t = $("trTopic").value;
+      const pool = BANK.filter(q => (!d || q.domain === d) && (!a || q.approach === a) && (!t || q.topic === t));
+      if (!pool.length){ modal("<p>No questions match those filters.</p>", [["OK", null, true]]); return; }
+      const n = Math.max(1, Math.min(+$("trCount").value || 25, pool.length));
+      newSession("train", shuffle(pool).slice(0, n).map(q => q.id), {title: "Training" + (d ? " · " + d : "") + (a ? " · " + a : "") + (t ? " · " + t : "") + " (" + n + ")", instant: true});
+    } else if (m === "weak"){
+      const ids = weakPick(25).map(q => q.id);
+      newSession("weak", ids, {title: "Weak-spot drill (" + ids.length + ")", instant: true});
+    }
+  };
+  if (load(LS_SESSION, null)) modal("<p>Starting a new session will discard the unfinished one.</p>", [["Cancel", null], ["Start new", begin, true]]);
+  else begin();
+});
+
+// ---------- modal ----------
+function modal(html, actions){
+  $("modalBody").innerHTML = html; const box = $("modalActions"); box.innerHTML = "";
+  actions.forEach(([label, fn, primary]) => {
+    const b = document.createElement("button"); b.textContent = label; if (primary) b.className = "primary";
+    b.onclick = () => { $("modal").classList.add("hidden"); if (fn) fn(); };
+    box.appendChild(b);
+  });
+  $("modal").classList.remove("hidden");
+  const p = box.querySelector(".primary") || box.lastChild; if (p) p.focus();
+}
+
+// ---------- keys ----------
+document.addEventListener("keydown", e => {
+  if (!$("modal").classList.contains("hidden")){ if (e.key === "Escape") $("modal").classList.add("hidden"); return; }
+  if (!S || $("exam").classList.contains("hidden") || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+  const k = e.key.toLowerCase();
+  if ("12345".includes(k) && k.length === 1) choose(+k - 1);
+  else if ("abcde".includes(k) && k.length === 1) choose(L.indexOf(k.toUpperCase()));
+  else if (k === "arrowright" || k === "n") $("nextBtn").click();
+  else if (k === "arrowleft" || k === "p") go(S.idx - 1);
+  else if (k === "f") $("flagBtn").click();
+  else if (k === "enter"){ if (S.instant && !S.checked[S.idx]) check(); else $("nextBtn").click(); }
+  else return;
+  e.preventDefault();
+});
+window.addEventListener("beforeunload", persist);
+
+renderHome();
+})();
+</script>
+</body>
+</html>
